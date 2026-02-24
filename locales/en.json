@@ -1,0 +1,81 @@
+{
+  "onboarding": {
+    "welcome": "Hi! Let's set up the bot for solving LeetCode problems.",
+    "choose_locale": "Choose interface language:",
+    "enter_session": "Enter <code>LEETCODE_SESSION</code> cookie.\n\nHow to get it:\n1. Open leetcode.com and log in\n2. DevTools (F12) → Application → Cookies → leetcode.com\n3. Copy the <code>LEETCODE_SESSION</code> value",
+    "enter_csrf": "Now enter <code>csrftoken</code> cookie.\n\nIn the same Cookies, copy the <code>csrftoken</code> value.",
+    "invalid_cookies": "❌ Cookies are invalid. Try again.",
+    "cookies_valid": "✅ Cookies accepted! Hello, <b>{username}</b>!",
+    "choose_lang": "Choose solution language:",
+    "choose_difficulty": "Choose difficulty:",
+    "choose_topics": "Choose topics (at least one):",
+    "done": "✅ All set! Use /daily or /random to start.",
+    "already_configured": "You're already set up! Use /settings to change preferences, /daily or /random for problems."
+  },
+  "solve": {
+    "describe_approach": "Describe your approach:",
+    "generating": "⏳ Generating code...",
+    "submitting": "⏳ Submitting for review...",
+    "accepted": "✅ <b>Accepted!</b>\n\n⏱ Runtime: <code>{runtime}</code> (beats {runtime_percentile}%)\n💾 Memory: <code>{memory}</code> (beats {memory_percentile}%)",
+    "wrong_answer": "❌ <b>Wrong Answer</b>\n\nTests passed: {correct}/{total}\n\nExpected: <code>{expected}</code>\nGot: <code>{output}</code>",
+    "tle": "⏰ <b>Time Limit Exceeded</b>\n\nTests passed: {correct}/{total}",
+    "runtime_error": "💥 <b>Runtime Error</b>\n\nTests passed: {correct}/{total}",
+    "timeout_polling": "⏳ Result not ready yet.",
+    "explain_code_btn": "💬 Explain code",
+    "explain_solution_btn": "📖 Review",
+    "hint_btn": "💡 Hint",
+    "revision": "Describe what to change:",
+    "check_again": "🔄 Check again"
+  },
+  "commands": {
+    "skip": "⏭ Problem skipped. Loading next...",
+    "cancel": "❌ Session cancelled.",
+    "daily_loading": "⏳ Loading daily problem...",
+    "random_loading": "⏳ Loading random problem..."
+  },
+  "settings": {
+    "menu": "⚙️ <b>Settings</b>\n\nInterface language: {locale}\nSolution language: {language}\nDifficulty: {difficulty}\nTopics: {topics}",
+    "locale": "Choose interface language:",
+    "language": "Choose solution language:",
+    "difficulty": "Choose difficulty:",
+    "topics": "Choose topics:",
+    "cookies": "Enter new <code>LEETCODE_SESSION</code> cookie:",
+    "updated": "✅ Setting updated.",
+    "back": "◀️ Back"
+  },
+  "errors": {
+    "leetcode_unavailable": "⚠️ LeetCode is not responding, try again later.",
+    "ai_unavailable": "⚠️ AI is temporarily unavailable, try again in a minute.",
+    "no_active_session": "No active problem. Try /daily or /random.",
+    "no_problems_available": "All problems matching your filters are solved! Try expanding filters in /settings.",
+    "unknown": "Something went wrong. Try again."
+  },
+  "buttons": {
+    "submit": "✅ Submit",
+    "edit": "🔄 Edit",
+    "explain": "💬 Explain",
+    "next": "🎲 Next",
+    "review": "📖 Review",
+    "hint": "💡 Hint",
+    "revise": "🔄 Revise",
+    "improve": "🚀 Improve",
+    "done": "✅ Done",
+    "back": "◀️ Back",
+    "check_again": "🔄 Check again",
+    "skip": "⏭ Skip",
+    "cancel": "❌ Cancel"
+  },
+  "stats": {
+    "header": "📊 <b>Statistics</b>",
+    "total_solved": "Total solved: <b>{total}</b>",
+    "by_difficulty": "🟢 Easy: {easy}  🟡 Medium: {medium}  🔴 Hard: {hard}",
+    "streak": "🔥 Current streak: <b>{streak}</b> days",
+    "favorite_topics": "⭐ Top topics: {topics}"
+  },
+  "cookie": {
+    "expired": "⚠️ Cookies have expired! You need to update them.",
+    "instruction": "How to get cookies:\n1. Open leetcode.com → log in\n2. DevTools (F12) → Application → Cookies\n3. Copy <code>LEETCODE_SESSION</code> and <code>csrftoken</code>",
+    "reminder": "🔔 Cookies haven't been updated for over 5 days. We recommend updating in /settings → Cookies."
+  },
+  "image_placeholder": "[📎 image]"
+}

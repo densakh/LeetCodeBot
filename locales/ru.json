@@ -1,0 +1,81 @@
+{
+  "onboarding": {
+    "welcome": "Привет! Давай настроим бота для решения задач LeetCode.",
+    "choose_locale": "Выбери язык интерфейса:",
+    "enter_session": "Введи <code>LEETCODE_SESSION</code> cookie.\n\nКак получить:\n1. Открой leetcode.com и войди в аккаунт\n2. DevTools (F12) → Application → Cookies → leetcode.com\n3. Скопируй значение <code>LEETCODE_SESSION</code>",
+    "enter_csrf": "Теперь введи <code>csrftoken</code> cookie.\n\nВ тех же Cookies скопируй значение <code>csrftoken</code>.",
+    "invalid_cookies": "❌ Куки невалидны. Попробуй ещё раз.",
+    "cookies_valid": "✅ Куки приняты! Привет, <b>{username}</b>!",
+    "choose_lang": "Выбери язык решений:",
+    "choose_difficulty": "Выбери сложность:",
+    "choose_topics": "Выбери темы (минимум одна):",
+    "done": "✅ Всё настроено! Используй /daily или /random для начала.",
+    "already_configured": "Ты уже настроен! Используй /settings для изменения настроек, /daily или /random для задач."
+  },
+  "solve": {
+    "describe_approach": "Опиши своё решение:",
+    "generating": "⏳ Генерирую код...",
+    "submitting": "⏳ Отправляю на проверку...",
+    "accepted": "✅ <b>Accepted!</b>\n\n⏱ Runtime: <code>{runtime}</code> (beats {runtime_percentile}%)\n💾 Memory: <code>{memory}</code> (beats {memory_percentile}%)",
+    "wrong_answer": "❌ <b>Wrong Answer</b>\n\nПройдено тестов: {correct}/{total}\n\nExpected: <code>{expected}</code>\nGot: <code>{output}</code>",
+    "tle": "⏰ <b>Time Limit Exceeded</b>\n\nПройдено тестов: {correct}/{total}",
+    "runtime_error": "💥 <b>Runtime Error</b>\n\nПройдено тестов: {correct}/{total}",
+    "timeout_polling": "⏳ Результат ещё не готов.",
+    "explain_code_btn": "💬 Объяснить код",
+    "explain_solution_btn": "📖 Разбор",
+    "hint_btn": "💡 Подсказка",
+    "revision": "Опиши, что нужно изменить:",
+    "check_again": "🔄 Проверить снова"
+  },
+  "commands": {
+    "skip": "⏭ Задача пропущена. Загружаю следующую...",
+    "cancel": "❌ Сессия отменена.",
+    "daily_loading": "⏳ Загружаю задачу дня...",
+    "random_loading": "⏳ Загружаю случайную задачу..."
+  },
+  "settings": {
+    "menu": "⚙️ <b>Настройки</b>\n\nЯзык интерфейса: {locale}\nЯзык решений: {language}\nСложность: {difficulty}\nТемы: {topics}",
+    "locale": "Выбери язык интерфейса:",
+    "language": "Выбери язык решений:",
+    "difficulty": "Выбери сложность:",
+    "topics": "Выбери темы:",
+    "cookies": "Введи новый <code>LEETCODE_SESSION</code> cookie:",
+    "updated": "✅ Настройка обновлена.",
+    "back": "◀️ Назад"
+  },
+  "errors": {
+    "leetcode_unavailable": "⚠️ LeetCode не отвечает, попробуй позже.",
+    "ai_unavailable": "⚠️ ИИ временно недоступен, попробуй через минуту.",
+    "no_active_session": "Нет активной задачи. Попробуй /daily или /random.",
+    "no_problems_available": "Все задачи по текущим фильтрам решены! Попробуй расширить фильтры в /settings.",
+    "unknown": "Что-то пошло не так. Попробуй ещё раз."
+  },
+  "buttons": {
+    "submit": "✅ Отправить",
+    "edit": "🔄 Изменить",
+    "explain": "💬 Объяснить",
+    "next": "🎲 Следующая",
+    "review": "📖 Разбор",
+    "hint": "💡 Подсказка",
+    "revise": "🔄 Пересмотреть",
+    "improve": "🚀 Улучшить",
+    "done": "✅ Готово",
+    "back": "◀️ Назад",
+    "check_again": "🔄 Проверить снова",
+    "skip": "⏭ Пропустить",
+    "cancel": "❌ Отмена"
+  },
+  "stats": {
+    "header": "📊 <b>Статистика</b>",
+    "total_solved": "Всего решено: <b>{total}</b>",
+    "by_difficulty": "🟢 Easy: {easy}  🟡 Medium: {medium}  🔴 Hard: {hard}",
+    "streak": "🔥 Текущий streak: <b>{streak}</b> дн.",
+    "favorite_topics": "⭐ Топ темы: {topics}"
+  },
+  "cookie": {
+    "expired": "⚠️ Куки истекли! Нужно обновить.",
+    "instruction": "Как получить куки:\n1. Открой leetcode.com → войди в аккаунт\n2. DevTools (F12) → Application → Cookies\n3. Скопируй <code>LEETCODE_SESSION</code> и <code>csrftoken</code>",
+    "reminder": "🔔 Куки не обновлялись больше 5 дней. Рекомендуем обновить в /settings → Куки."
+  },
+  "image_placeholder": "[📎 изображение]"
+}
