@@ -82,6 +82,8 @@ query submissionDetails($submissionId: Int!) {
     totalTestcases
     expectedOutput
     codeOutput
+    compileError
+    runtimeError
   }
 }
 """

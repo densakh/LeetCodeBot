@@ -74,53 +74,27 @@ chmod +x deploy.sh
 The deploy script will:
 - Check Python version
 - Create a virtual environment
-- Install dependencies
+- Install dependencies + patchright Chromium
+- Install Xvfb (for headless Cloudflare bypass)
 - Initialize the database
-- Create and start a systemd service
+- Create and start a systemd service (via `xvfb-run`)
 
 ### 5. Transfer to another machine (without git)
 
-If you need to copy the project manually (e.g. via `scp` or `rsync`):
-
 ```bash
-# From the source machine — archive only the source code
-rsync -av --exclude='.venv' \
-         --exclude='data' \
-         --exclude='logs' \
-         --exclude='__pycache__' \
-         --exclude='*.pyc' \
-         --exclude='.env' \
-         --exclude='.idea' \
-         --exclude='.git' \
-         ./ user@target:/path/to/leetcode-bot/
-
-# Or create a tarball
-tar czf leetcode-bot.tar.gz \
-    --exclude='.venv' \
-    --exclude='data' \
-    --exclude='logs' \
-    --exclude='__pycache__' \
-    --exclude='*.pyc' \
-    --exclude='.env' \
-    --exclude='.idea' \
-    --exclude='.git' \
-    -C /path/to/project .
+rsync -av --exclude={'.venv','data','logs','__pycache__','*.pyc','.env','.idea','.git'} ./ user@target:/path/to/leetcode-bot/
 ```
 
-On the target machine — set up as usual:
+On the target machine:
 
 ```bash
 cd /path/to/leetcode-bot
-cp .env.example .env
-chmod 600 .env
+cp .env.example .env && chmod 600 .env
 # fill in .env
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python main.py
+./deploy.sh
 ```
 
-> The `data/` directory (SQLite database) is excluded intentionally — it will be recreated on first launch. If you want to keep history, copy `data/` separately.
+> `data/` is excluded — it will be recreated on first launch. Copy it separately to keep history.
 
 ## Bot Commands
 
@@ -183,6 +157,7 @@ leetcode-bot/
 │   └── en.json
 ├── leetcode/
 │   ├── client.py            # LeetCode API client
+│   ├── playwright_submit.py # Cloudflare bypass via patchright
 │   ├── queries.py           # GraphQL queries
 │   ├── models.py            # data models
 │   └── html_converter.py    # HTML to Telegram format

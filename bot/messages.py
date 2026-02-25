@@ -135,6 +135,30 @@ def fmt_runtime_error(result: SubmissionResult, i18n: I18n) -> str:
     )
 
 
+def fmt_compile_error(result: SubmissionResult, i18n: I18n) -> str:
+    return i18n.get(
+        "solve.compile_error",
+        error=escape_html(result.compile_error or "Unknown error"),
+    )
+
+
+def fmt_memory_limit(result: SubmissionResult, i18n: I18n) -> str:
+    return i18n.get(
+        "solve.memory_limit",
+        correct=str(result.total_correct),
+        total=str(result.total_testcases),
+    )
+
+
+def fmt_unknown_result(result: SubmissionResult, i18n: I18n) -> str:
+    return i18n.get(
+        "solve.unknown_result",
+        status_code=str(result.status_code),
+        correct=str(result.total_correct),
+        total=str(result.total_testcases),
+    )
+
+
 def fmt_stats(stats: dict, i18n: I18n) -> str:
     bd = stats["by_difficulty"]
     topics_str = ", ".join(stats["favorite_topics"]) if stats["favorite_topics"] else "—"

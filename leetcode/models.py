@@ -33,4 +33,6 @@ class SubmissionResult:
     total_testcases: int = 0
     expected_output: str = ""
     code_output: str = ""
+    compile_error: str = ""
+    runtime_error: str = ""
     is_pending: bool = False

@@ -31,6 +31,9 @@ from bot.messages import (
     fmt_wrong_answer,
     fmt_tle,
     fmt_runtime_error,
+    fmt_compile_error,
+    fmt_memory_limit,
+    fmt_unknown_result,
     md_code_to_html,
     split_message,
 )
@@ -198,6 +201,8 @@ async def on_solve_action(callback: CallbackQuery, callback_data: SolveActionCal
     ai_client: ClaudeClient = services["ai_client"]
     lc_client: LeetCodeClient = services["lc_client"]
 
+    await callback.answer()
+
     if action == "submit":
         await callback.message.edit_text(i18n.get("solve.submitting"))
         await state.set_state(SolvingStates.SUBMIT)
@@ -235,8 +240,6 @@ async def on_solve_action(callback: CallbackQuery, callback_data: SolveActionCal
         except AIError:
             await callback.message.answer(i18n.get("errors.ai_unavailable"))
         # Stay in REVIEW
-
-    await callback.answer()
 
 
 @router.message(SolvingStates.EDIT)
@@ -386,6 +389,37 @@ async def _poll_submission(
             await update_adaptive_difficulty(db_path, telegram_id, accepted=False)
             await state.set_state(SolvingStates.RESULT)
             await state.update_data(last_result_code=15)
+
+        elif result.status_code == 20:  # Compile Error
+            await message.answer(
+                fmt_compile_error(result, i18n),
+                reply_markup=result_wrong_keyboard(i18n),
+                parse_mode="HTML",
+            )
+            await update_adaptive_difficulty(db_path, telegram_id, accepted=False)
+            await state.set_state(SolvingStates.RESULT)
+            await state.update_data(last_result_code=20)
+
+        elif result.status_code == 12:  # Memory Limit Exceeded
+            await message.answer(
+                fmt_memory_limit(result, i18n),
+                reply_markup=result_tle_keyboard(i18n),
+                parse_mode="HTML",
+            )
+            await update_adaptive_difficulty(db_path, telegram_id, accepted=False)
+            await state.set_state(SolvingStates.RESULT)
+            await state.update_data(last_result_code=12)
+
+        else:  # Any other status code
+            logger.warning("Unhandled submission status_code=%d", result.status_code)
+            await message.answer(
+                fmt_unknown_result(result, i18n),
+                reply_markup=result_wrong_keyboard(i18n),
+                parse_mode="HTML",
+            )
+            await update_adaptive_difficulty(db_path, telegram_id, accepted=False)
+            await state.set_state(SolvingStates.RESULT)
+            await state.update_data(last_result_code=result.status_code)
 
         return
 

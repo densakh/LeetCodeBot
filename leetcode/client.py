@@ -5,6 +5,7 @@ import random
 import httpx
 
 from leetcode.html_converter import convert_problem_html
+from leetcode.playwright_submit import PlaywrightSubmitter
 from leetcode.models import CodeSnippet, Problem, SubmissionResult
 from leetcode.queries import (
     GLOBAL_DATA_QUERY,
@@ -32,11 +33,12 @@ class LeetCodeUnavailableError(LeetCodeError):
 class LeetCodeClient:
     BASE_URL = "https://leetcode.com"
 
-    def __init__(self, session_cookie: str, csrf_token: str, cf_clearance: str = "", locale: str = "ru"):
+    def __init__(self, session_cookie: str, csrf_token: str, locale: str = "ru"):
         self.locale = locale
+        self._session_cookie = session_cookie
+        self._csrf_token = csrf_token
+        self._submitter: PlaywrightSubmitter | None = None
         cookies = f"LEETCODE_SESSION={session_cookie}; csrftoken={csrf_token}"
-        if cf_clearance:
-            cookies += f"; cf_clearance={cf_clearance}"
         self._client = httpx.AsyncClient(
             headers={
                 "Content-Type": "application/json",
@@ -210,41 +212,30 @@ class LeetCodeClient:
 
         return None
 
+    async def _ensure_submitter(self) -> PlaywrightSubmitter:
+        if self._submitter is None:
+            self._submitter = PlaywrightSubmitter(
+                self._session_cookie, self._csrf_token
+            )
+            await self._submitter.start()
+        return self._submitter
+
     async def submit_solution(
         self, slug: str, lang: str, code: str, question_id: str
     ) -> int:
-        delays = [1, 2, 4]
-        for attempt in range(3):
+        submitter = await self._ensure_submitter()
+        delays = [2, 4]
+
+        for attempt in range(2):
             try:
-                resp = await self._client.post(
-                    f"{self.BASE_URL}/problems/{slug}/submit/",
-                    json={
-                        "lang": lang,
-                        "question_id": question_id,
-                        "typed_code": code,
-                    },
-                )
-
-                if resp.status_code == 403:
-                    raise CookieExpiredError("LeetCode cookies expired")
-
-                if resp.status_code == 429 or resp.status_code >= 500:
-                    if attempt < 2:
-                        await asyncio.sleep(delays[attempt])
-                        continue
-                    raise LeetCodeUnavailableError(
-                        f"Submit returned {resp.status_code}"
-                    )
-
-                resp.raise_for_status()
-                return resp.json()["submission_id"]
-
-            except (httpx.TimeoutException, httpx.ConnectError) as e:
-                if attempt < 2:
+                return await submitter.submit(slug, lang, code, question_id)
+            except CookieExpiredError:
+                raise
+            except LeetCodeError:
+                if attempt == 0:
+                    logger.warning("Playwright submit failed, retrying in %ds", delays[attempt])
                     await asyncio.sleep(delays[attempt])
                     continue
-                raise LeetCodeUnavailableError(str(e)) from e
-            except (CookieExpiredError, LeetCodeError):
                 raise
 
         raise LeetCodeUnavailableError("Submit failed after retries")
@@ -272,7 +263,12 @@ class LeetCodeClient:
             total_testcases=int(details.get("totalTestcases") or 0),
             expected_output=details.get("expectedOutput", ""),
             code_output=details.get("codeOutput", ""),
+            compile_error=details.get("compileError", ""),
+            runtime_error=details.get("runtimeError", ""),
         )
 
     async def close(self) -> None:
+        if self._submitter:
+            await self._submitter.close()
+            self._submitter = None
         await self._client.aclose()

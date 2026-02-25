@@ -50,13 +50,15 @@ class ClaudeClient(BaseAIClient):
         return text.strip()
 
     async def _ask(
-        self, prompt: str, max_tokens: int, system: str = SYSTEM_PROMPT
+        self, prompt: str, max_tokens: int, system: str = SYSTEM_PROMPT,
+        temperature: float = 1.0,
     ) -> str:
         try:
             response = await self._client.messages.create(
                 model=self._model,
                 max_tokens=max_tokens,
                 system=system,
+                temperature=temperature,
                 messages=[{"role": "user", "content": prompt}],
             )
             return response.content[0].text
