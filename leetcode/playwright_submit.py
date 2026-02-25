@@ -97,11 +97,17 @@ class PlaywrightSubmitter:
             logger.info("Direct POST failed (status=%d), will navigate", resp.status)
 
         # Navigate to the problem page — establishes browser TLS state with Cloudflare
-        logger.info("Navigating to %s", problem_url)
-        try:
-            await page.goto(problem_url, wait_until="domcontentloaded", timeout=60000)
-        except Exception as e:
-            logger.warning("page.goto raised: %s, continuing anyway", e)
+        # Retry navigation: first attempt often gets ERR_EMPTY_RESPONSE,
+        # but retries can succeed after Cloudflare warms up to the browser
+        for nav_attempt in range(3):
+            logger.info("Navigating to %s (attempt %d)", problem_url, nav_attempt)
+            try:
+                await page.goto(problem_url, wait_until="domcontentloaded", timeout=15000)
+                logger.info("Navigation succeeded")
+                break
+            except Exception as e:
+                logger.warning("page.goto attempt %d raised: %s", nav_attempt, e)
+                await asyncio.sleep(5)
 
         # Try to solve Turnstile if present
         await self._solve_turnstile(page)
