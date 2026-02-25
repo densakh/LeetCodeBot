@@ -49,6 +49,7 @@
   "errors": {
     "leetcode_unavailable": "⚠️ LeetCode не отвечает, попробуй позже.",
     "ai_unavailable": "⚠️ ИИ временно недоступен, попробуй через минуту.",
+    "ai_overloaded": "⚠️ Серверы Claude перегружены (529). Попробуй через пару минут.",
     "no_active_session": "Нет активной задачи. Попробуй /daily или /random.",
     "not_configured": "Сначала настрой бота: /start",
     "no_problems_available": "Все задачи по текущим фильтрам решены! Попробуй расширить фильтры в /settings.",

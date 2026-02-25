@@ -190,8 +190,9 @@ async def on_approach(message: Message, state: FSMContext, i18n: I18n, db_path: 
                 await message.answer(part, parse_mode="HTML")
             # Stay in APPROACH
 
-    except AIError:
-        await message.answer(i18n.get("errors.ai_unavailable"))
+    except AIError as e:
+        key = "errors.ai_overloaded" if "overloaded" in str(e) else "errors.ai_unavailable"
+        await message.answer(i18n.get(key))
 
 
 @router.callback_query(SolvingStates.REVIEW, SolveActionCallback.filter())
@@ -237,8 +238,9 @@ async def on_solve_action(callback: CallbackQuery, callback_data: SolveActionCal
             explanation_html = md_code_to_html(explanation)
             for part in split_message(explanation_html):
                 await callback.message.answer(part, parse_mode="HTML")
-        except AIError:
-            await callback.message.answer(i18n.get("errors.ai_unavailable"))
+        except AIError as e:
+            key = "errors.ai_overloaded" if "overloaded" in str(e) else "errors.ai_unavailable"
+            await callback.message.answer(i18n.get(key))
         # Stay in REVIEW
 
 
@@ -303,8 +305,9 @@ async def on_edit(message: Message, state: FSMContext, i18n: I18n, db_path: str,
                 await message.answer(part, parse_mode="HTML")
             # Stay in EDIT
 
-    except AIError:
-        await message.answer(i18n.get("errors.ai_unavailable"))
+    except AIError as e:
+        key = "errors.ai_overloaded" if "overloaded" in str(e) else "errors.ai_unavailable"
+        await message.answer(i18n.get(key))
 
 
 async def _poll_submission(
@@ -490,8 +493,9 @@ async def on_result_action(callback: CallbackQuery, callback_data: ResultActionC
             explanation_html = md_code_to_html(explanation)
             for part in split_message(explanation_html):
                 await callback.message.answer(part, parse_mode="HTML")
-        except AIError:
-            await callback.message.answer(i18n.get("errors.ai_unavailable"))
+        except AIError as e:
+            key = "errors.ai_overloaded" if "overloaded" in str(e) else "errors.ai_unavailable"
+            await callback.message.answer(i18n.get(key))
 
     elif action == "hint":
         try:
@@ -507,8 +511,9 @@ async def on_result_action(callback: CallbackQuery, callback_data: ResultActionC
             hint_html = md_code_to_html(hint)
             for part in split_message(hint_html):
                 await callback.message.answer(part, parse_mode="HTML")
-        except AIError:
-            await callback.message.answer(i18n.get("errors.ai_unavailable"))
+        except AIError as e:
+            key = "errors.ai_overloaded" if "overloaded" in str(e) else "errors.ai_unavailable"
+            await callback.message.answer(i18n.get(key))
 
     elif action == "improve":
         try:
@@ -526,8 +531,9 @@ async def on_result_action(callback: CallbackQuery, callback_data: ResultActionC
             for part in split_message(suggestion_html):
                 await callback.message.answer(part, parse_mode="HTML")
             # Stay in RESULT — user clicks "Revise" when ready to implement
-        except AIError:
-            await callback.message.answer(i18n.get("errors.ai_unavailable"))
+        except AIError as e:
+            key = "errors.ai_overloaded" if "overloaded" in str(e) else "errors.ai_unavailable"
+            await callback.message.answer(i18n.get(key))
 
     elif action == "revise":
         await callback.message.answer(i18n.get("solve.describe_approach"))

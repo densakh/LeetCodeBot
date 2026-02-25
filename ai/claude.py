@@ -64,7 +64,8 @@ class ClaudeClient(BaseAIClient):
             return response.content[0].text
         except Exception as e:
             logger.error("Claude API error: %s", e)
-            raise AIError(str(e)) from e
+            reason = "overloaded" if "529" in str(e) or "overload" in str(e).lower() else str(e)
+            raise AIError(reason) from e
 
     def _parse_ai_response(self, raw: str) -> AIResponse:
         """Parse JSON response from AI into AIResponse."""

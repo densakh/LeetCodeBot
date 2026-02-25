@@ -47,8 +47,15 @@ HINT_WITH_CODE_PROMPT = (
     "Expected: {expected}\n"
     "Got: {output}\n\n"
     "Language: {language}\n\n"
-    "Give a specific hint about what went wrong. "
-    "Do NOT give a ready-made fix, only point toward the error.\n\n"
+    "Analyze the bug and give a hint.\n"
+    "- If the bug is a LANGUAGE/SYNTAX issue (wrong operator like / vs //, "
+    "integer overflow, type casting, off-by-one from 0/1-indexing, etc.) — "
+    "tell the user DIRECTLY what the problem is and how to fix it. "
+    "The user is practicing algorithms, not language syntax.\n"
+    "- If the bug is ALGORITHMIC (wrong approach, missing edge case, "
+    "wrong data structure, incorrect logic) — give a hint that points "
+    "toward the error, but do NOT give a ready-made fix. "
+    "Let the user figure out the solution themselves.\n\n"
     "{locale_instruction}"
 )
 
