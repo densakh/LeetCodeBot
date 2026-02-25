@@ -278,7 +278,7 @@ class LeetCodeClient:
             return SubmissionResult(status_code=0, is_pending=True)
 
         status_code = details.get("statusCode")
-        if status_code is None:
+        if status_code is None or int(status_code) == 16:
             return SubmissionResult(status_code=0, is_pending=True)
 
         return SubmissionResult(
