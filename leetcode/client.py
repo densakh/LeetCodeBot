@@ -7,6 +7,12 @@ import httpx
 from leetcode.html_converter import convert_problem_html
 from leetcode.playwright_submit import PlaywrightSubmitter
 from leetcode.models import CodeSnippet, Problem, SubmissionResult
+
+try:
+    from curl_cffi.requests import AsyncSession as CurlAsyncSession
+    HAS_CURL_CFFI = True
+except ImportError:
+    HAS_CURL_CFFI = False
 from leetcode.queries import (
     GLOBAL_DATA_QUERY,
     PROBLEMSET_QUESTION_LIST_QUERY,
@@ -220,9 +226,55 @@ class LeetCodeClient:
             await self._submitter.start()
         return self._submitter
 
+    async def _submit_curl_cffi(
+        self, slug: str, lang: str, code: str, question_id: str
+    ) -> int | None:
+        """Try submit via curl_cffi with Firefox TLS fingerprint. Returns submission_id or None."""
+        if not HAS_CURL_CFFI:
+            return None
+
+        submit_url = f"{self.BASE_URL}/problems/{slug}/submit/"
+        problem_url = f"{self.BASE_URL}/problems/{slug}/"
+
+        try:
+            async with CurlAsyncSession(impersonate="firefox136") as session:
+                resp = await session.post(
+                    submit_url,
+                    json={
+                        "lang": lang,
+                        "question_id": question_id,
+                        "typed_code": code,
+                    },
+                    headers={
+                        "x-csrftoken": self._csrf_token,
+                        "Referer": problem_url,
+                    },
+                    cookies={
+                        "LEETCODE_SESSION": self._session_cookie,
+                        "csrftoken": self._csrf_token,
+                    },
+                )
+                if resp.status_code == 200:
+                    body = resp.json()
+                    submission_id = body.get("submission_id")
+                    if submission_id:
+                        logger.info("Submit OK via curl_cffi, submission_id=%s", submission_id)
+                        return int(submission_id)
+                logger.info("curl_cffi submit failed (status=%d), falling back to Playwright", resp.status_code)
+                return None
+        except Exception as e:
+            logger.warning("curl_cffi submit error: %s, falling back to Playwright", e)
+            return None
+
     async def submit_solution(
         self, slug: str, lang: str, code: str, question_id: str
     ) -> int:
+        # Try curl_cffi first (fast, no browser)
+        result = await self._submit_curl_cffi(slug, lang, code, question_id)
+        if result is not None:
+            return result
+
+        # Fallback to Playwright
         submitter = await self._ensure_submitter()
         delays = [2, 4]
 
