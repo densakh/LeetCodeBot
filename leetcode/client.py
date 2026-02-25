@@ -237,7 +237,7 @@ class LeetCodeClient:
         problem_url = f"{self.BASE_URL}/problems/{slug}/"
 
         try:
-            async with CurlAsyncSession(impersonate="firefox136") as session:
+            async with CurlAsyncSession(impersonate="firefox133") as session:
                 resp = await session.post(
                     submit_url,
                     json={
