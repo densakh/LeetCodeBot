@@ -127,7 +127,7 @@ async def on_solve_lang(callback: CallbackQuery, callback_data: LangCallback, st
     await callback.answer()
 
 
-@router.message(SolvingStates.APPROACH)
+@router.message(SolvingStates.APPROACH, F.text, ~F.text.startswith("/"))
 async def on_approach(message: Message, state: FSMContext, i18n: I18n, db_path: str, services: dict):
     text = message.text.strip()
     data = await state.get_data()
@@ -244,7 +244,7 @@ async def on_solve_action(callback: CallbackQuery, callback_data: SolveActionCal
         # Stay in REVIEW
 
 
-@router.message(SolvingStates.EDIT)
+@router.message(SolvingStates.EDIT, F.text, ~F.text.startswith("/"))
 async def on_edit(message: Message, state: FSMContext, i18n: I18n, db_path: str, services: dict):
     text = message.text.strip()
     data = await state.get_data()
