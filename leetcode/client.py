@@ -3,16 +3,10 @@ import logging
 import random
 
 import httpx
+from curl_cffi.requests import AsyncSession as CurlAsyncSession
 
 from leetcode.html_converter import convert_problem_html
-from leetcode.playwright_submit import PlaywrightSubmitter
 from leetcode.models import CodeSnippet, Problem, SubmissionResult
-
-try:
-    from curl_cffi.requests import AsyncSession as CurlAsyncSession
-    HAS_CURL_CFFI = True
-except ImportError:
-    HAS_CURL_CFFI = False
 from leetcode.queries import (
     GLOBAL_DATA_QUERY,
     PROBLEMSET_QUESTION_LIST_QUERY,
@@ -43,7 +37,6 @@ class LeetCodeClient:
         self.locale = locale
         self._session_cookie = session_cookie
         self._csrf_token = csrf_token
-        self._submitter: PlaywrightSubmitter | None = None
         cookies = f"LEETCODE_SESSION={session_cookie}; csrftoken={csrf_token}"
         self._client = httpx.AsyncClient(
             headers={
@@ -218,77 +211,60 @@ class LeetCodeClient:
 
         return None
 
-    async def _ensure_submitter(self) -> PlaywrightSubmitter:
-        if self._submitter is None:
-            self._submitter = PlaywrightSubmitter(
-                self._session_cookie, self._csrf_token
-            )
-            await self._submitter.start()
-        return self._submitter
-
-    async def _submit_curl_cffi(
-        self, slug: str, lang: str, code: str, question_id: str
-    ) -> int | None:
-        """Try submit via curl_cffi with Firefox TLS fingerprint. Returns submission_id or None."""
-        if not HAS_CURL_CFFI:
-            return None
-
-        submit_url = f"{self.BASE_URL}/problems/{slug}/submit/"
-        problem_url = f"{self.BASE_URL}/problems/{slug}/"
-
-        try:
-            async with CurlAsyncSession(impersonate="firefox133") as session:
-                resp = await session.post(
-                    submit_url,
-                    json={
-                        "lang": lang,
-                        "question_id": question_id,
-                        "typed_code": code,
-                    },
-                    headers={
-                        "x-csrftoken": self._csrf_token,
-                        "Referer": problem_url,
-                    },
-                    cookies={
-                        "LEETCODE_SESSION": self._session_cookie,
-                        "csrftoken": self._csrf_token,
-                    },
-                )
-                if resp.status_code == 200:
-                    body = resp.json()
-                    submission_id = body.get("submission_id")
-                    if submission_id:
-                        logger.info("Submit OK via curl_cffi, submission_id=%s", submission_id)
-                        return int(submission_id)
-                logger.info("curl_cffi submit failed (status=%d), falling back to Playwright", resp.status_code)
-                return None
-        except Exception as e:
-            logger.warning("curl_cffi submit error: %s, falling back to Playwright", e)
-            return None
-
     async def submit_solution(
         self, slug: str, lang: str, code: str, question_id: str
     ) -> int:
-        # Try curl_cffi first (fast, no browser)
-        result = await self._submit_curl_cffi(slug, lang, code, question_id)
-        if result is not None:
-            return result
-
-        # Fallback to Playwright
-        submitter = await self._ensure_submitter()
+        submit_url = f"{self.BASE_URL}/problems/{slug}/submit/"
+        problem_url = f"{self.BASE_URL}/problems/{slug}/"
         delays = [2, 4]
 
         for attempt in range(2):
             try:
-                return await submitter.submit(slug, lang, code, question_id)
-            except CookieExpiredError:
+                async with CurlAsyncSession(impersonate="firefox133") as session:
+                    resp = await session.post(
+                        submit_url,
+                        json={
+                            "lang": lang,
+                            "question_id": question_id,
+                            "typed_code": code,
+                        },
+                        headers={
+                            "x-csrftoken": self._csrf_token,
+                            "Referer": problem_url,
+                        },
+                        cookies={
+                            "LEETCODE_SESSION": self._session_cookie,
+                            "csrftoken": self._csrf_token,
+                        },
+                    )
+
+                if resp.status_code == 403:
+                    raise CookieExpiredError("LeetCode cookies expired")
+
+                if resp.status_code == 429 or resp.status_code >= 500:
+                    if attempt == 0:
+                        await asyncio.sleep(delays[attempt])
+                        continue
+                    raise LeetCodeUnavailableError(
+                        f"Submit returned {resp.status_code}"
+                    )
+
+                body = resp.json()
+                submission_id = body.get("submission_id")
+                if not submission_id:
+                    raise LeetCodeError(f"No submission_id in response: {body}")
+
+                logger.info("Submit OK via curl_cffi, submission_id=%s", submission_id)
+                return int(submission_id)
+
+            except (CookieExpiredError, LeetCodeError):
                 raise
-            except LeetCodeError:
+            except Exception as e:
                 if attempt == 0:
-                    logger.warning("Playwright submit failed, retrying in %ds", delays[attempt])
+                    logger.warning("Submit failed: %s, retrying in %ds", e, delays[attempt])
                     await asyncio.sleep(delays[attempt])
                     continue
-                raise
+                raise LeetCodeUnavailableError(str(e)) from e
 
         raise LeetCodeUnavailableError("Submit failed after retries")
 
@@ -320,7 +296,4 @@ class LeetCodeClient:
         )
 
     async def close(self) -> None:
-        if self._submitter:
-            await self._submitter.close()
-            self._submitter = None
         await self._client.aclose()

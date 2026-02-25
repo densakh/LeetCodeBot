@@ -35,13 +35,6 @@ echo "Installing dependencies..."
 source venv/bin/activate
 pip install -r requirements.txt --quiet
 
-patchright install chromium
-if ! command -v Xvfb &>/dev/null; then
-    echo "Installing Xvfb..."
-    sudo apt-get update -qq
-    sudo apt-get install -y -qq xvfb
-fi
-
 # Create .env if not exists
 if [ ! -f ".env" ]; then
     echo "Creating .env from .env.example..."
@@ -68,7 +61,7 @@ After=network.target
 Type=simple
 WorkingDirectory=${PROJECT_DIR}
 EnvironmentFile=${PROJECT_DIR}/.env
-ExecStart=/usr/bin/xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" ${PROJECT_DIR}/venv/bin/python main.py
+ExecStart=${PROJECT_DIR}/venv/bin/python main.py
 Restart=on-failure
 RestartSec=5
 

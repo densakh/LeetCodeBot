@@ -74,10 +74,9 @@ chmod +x deploy.sh
 The deploy script will:
 - Check Python version
 - Create a virtual environment
-- Install dependencies + patchright Chromium
-- Install Xvfb (for headless Cloudflare bypass)
+- Install dependencies
 - Initialize the database
-- Create and start a systemd service (via `xvfb-run`)
+- Create and start a systemd service
 
 ### 5. Transfer to another machine (without git)
 
@@ -157,7 +156,6 @@ leetcode-bot/
 │   └── en.json
 ├── leetcode/
 │   ├── client.py            # LeetCode API client
-│   ├── playwright_submit.py # Cloudflare bypass via patchright
 │   ├── queries.py           # GraphQL queries
 │   ├── models.py            # data models
 │   └── html_converter.py    # HTML to Telegram format
