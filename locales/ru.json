@@ -50,6 +50,7 @@
     "leetcode_unavailable": "⚠️ LeetCode не отвечает, попробуй позже.",
     "ai_unavailable": "⚠️ ИИ временно недоступен, попробуй через минуту.",
     "no_active_session": "Нет активной задачи. Попробуй /daily или /random.",
+    "not_configured": "Сначала настрой бота: /start",
     "no_problems_available": "Все задачи по текущим фильтрам решены! Попробуй расширить фильтры в /settings.",
     "unknown": "Что-то пошло не так. Попробуй ещё раз."
   },

@@ -59,7 +59,7 @@ class PlaywrightSubmitter:
     async def submit(
         self, slug: str, lang: str, code: str, question_id: str
     ) -> int:
-        """POST submit via patchright. Falls back to navigation if direct POST gets 403."""
+        """Navigate to problem page first (establishes TLS state), then POST submit."""
         page = await self._context.new_page()
         try:
             return await self._do_submit(page, slug, lang, code, question_id)
@@ -72,50 +72,41 @@ class PlaywrightSubmitter:
         problem_url = f"{LEETCODE_URL}/problems/{slug}/"
         submit_url = f"{LEETCODE_URL}/problems/{slug}/submit/"
 
-        # Always try direct POST first — patchright TLS fingerprint often passes
-        csrf = await self._get_csrf_from_cookies()
-        resp = await page.request.post(
-            submit_url,
-            headers={
-                "Content-Type": "application/json",
-                "x-csrftoken": csrf,
-                "Referer": problem_url,
-            },
-            data=json.dumps({
-                "lang": lang,
-                "question_id": question_id,
-                "typed_code": code,
-            }),
-        )
+        # If cf_clearance exists from a previous submit, try direct POST
+        if await self._has_cf_clearance():
+            csrf = await self._get_csrf_from_cookies()
+            resp = await page.request.post(
+                submit_url,
+                headers={
+                    "Content-Type": "application/json",
+                    "x-csrftoken": csrf,
+                    "Referer": problem_url,
+                },
+                data=json.dumps({
+                    "lang": lang,
+                    "question_id": question_id,
+                    "typed_code": code,
+                }),
+            )
+            if resp.ok:
+                body = await resp.json()
+                submission_id = body.get("submission_id")
+                if submission_id:
+                    logger.info("Submit OK via direct POST, submission_id=%s", submission_id)
+                    return int(submission_id)
+            logger.info("Direct POST failed (status=%d), will navigate", resp.status)
 
-        if resp.ok:
-            body = await resp.json()
-            submission_id = body.get("submission_id")
-            if submission_id:
-                logger.info("Submit OK via direct POST, submission_id=%s", submission_id)
-                return int(submission_id)
-
-        if resp.status != 403:
-            # Not a Cloudflare block — handle as error
-            if resp.status == 429 or resp.status >= 500:
-                from leetcode.client import LeetCodeUnavailableError
-                raise LeetCodeUnavailableError(
-                    f"Playwright submit returned {resp.status}"
-                )
-            from leetcode.client import LeetCodeError
-            raise LeetCodeError(f"Submit returned {resp.status}")
-
-        # 403 — Cloudflare blocked, need to navigate for challenge
-        logger.info("Direct POST blocked (403), navigating to %s", problem_url)
+        # Navigate to the problem page — establishes browser TLS state with Cloudflare
+        logger.info("Navigating to %s", problem_url)
         try:
             await page.goto(problem_url, wait_until="domcontentloaded", timeout=60000)
         except Exception as e:
             logger.warning("page.goto raised: %s, continuing anyway", e)
 
-        # Try to solve Turnstile challenge
+        # Try to solve Turnstile if present
         await self._solve_turnstile(page)
 
-        # Retry POST after challenge
+        # POST submit after navigation
         csrf = await self._get_csrf_from_cookies()
         resp = await page.request.post(
             submit_url,
@@ -135,7 +126,7 @@ class PlaywrightSubmitter:
 
         if resp.status == 403:
             body_text = await resp.text()
-            logger.error("Submit 403 after challenge: %s", body_text[:500])
+            logger.error("Submit 403 after navigation: %s", body_text[:500])
             from leetcode.client import CookieExpiredError
             raise CookieExpiredError("LeetCode cookies expired (Playwright submit)")
 
@@ -158,6 +149,19 @@ class PlaywrightSubmitter:
         """Find and click the Cloudflare Turnstile checkbox, then wait for cf_clearance."""
         await asyncio.sleep(2)
 
+        # Check if Turnstile iframe exists at all
+        iframe_found = False
+        try:
+            iframe = page.locator("iframe[src*='challenges.cloudflare.com']")
+            iframe_found = await iframe.count() > 0
+        except Exception:
+            pass
+
+        if not iframe_found:
+            logger.info("No Turnstile iframe found, skipping challenge")
+            return
+
+        # Try to click the checkbox inside the iframe
         clicked = False
         for attempt in range(5):
             try:
@@ -177,31 +181,31 @@ class PlaywrightSubmitter:
             await asyncio.sleep(1)
 
         if not clicked:
+            # Fallback: click iframe by coordinates
             try:
-                iframe = page.locator("iframe[src*='challenges.cloudflare.com']")
-                if await iframe.count() > 0:
-                    box = await iframe.first.bounding_box()
-                    if box:
-                        await page.mouse.click(
-                            box["x"] + 30,
-                            box["y"] + box["height"] / 2,
-                        )
-                        logger.info("Clicked Turnstile iframe via coordinates")
-                        clicked = True
+                box = await iframe.first.bounding_box()
+                if box:
+                    await page.mouse.click(
+                        box["x"] + 30,
+                        box["y"] + box["height"] / 2,
+                    )
+                    logger.info("Clicked Turnstile iframe via coordinates")
+                    clicked = True
             except Exception as e:
                 logger.debug("Turnstile iframe click fallback: %s", e)
 
         if not clicked:
-            logger.warning("Could not find/click Turnstile checkbox")
+            logger.warning("Could not click Turnstile checkbox")
+            return
 
-        # Wait for cf_clearance cookie (max 20s)
+        # Wait for cf_clearance only if we actually clicked something
         for i in range(10):
             if await self._has_cf_clearance():
                 logger.info("cf_clearance obtained (%ds)", i * 2)
                 return
             await asyncio.sleep(2)
 
-        logger.warning("cf_clearance not found, trying submit anyway")
+        logger.warning("cf_clearance not found after click, trying submit anyway")
 
     async def _has_cf_clearance(self) -> bool:
         cookies = await self._context.cookies(LEETCODE_URL)

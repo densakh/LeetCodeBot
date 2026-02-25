@@ -41,7 +41,7 @@ class SettingsStates(StatesGroup):
 async def cmd_settings(message: Message, state: FSMContext, i18n: I18n, db_path: str):
     user = await get_user(db_path, message.from_user.id)
     if not user:
-        await message.answer(i18n.get("errors.no_active_session"))
+        await message.answer(i18n.get("errors.not_configured"))
         return
 
     # Save current state if in solving flow

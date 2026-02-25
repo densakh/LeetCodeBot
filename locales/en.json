@@ -50,6 +50,7 @@
     "leetcode_unavailable": "⚠️ LeetCode is not responding, try again later.",
     "ai_unavailable": "⚠️ AI is temporarily unavailable, try again in a minute.",
     "no_active_session": "No active problem. Try /daily or /random.",
+    "not_configured": "Set up the bot first: /start",
     "no_problems_available": "All problems matching your filters are solved! Try expanding filters in /settings.",
     "unknown": "Something went wrong. Try again."
   },

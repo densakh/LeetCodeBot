@@ -20,7 +20,7 @@ router = Router()
 async def cmd_daily(message: Message, state: FSMContext, i18n: I18n, db_path: str, services: dict):
     user = await get_user(db_path, message.from_user.id)
     if not user or not user.get("lc_session"):
-        await message.answer(i18n.get("onboarding.already_configured").replace("!", ".").split(".")[0] + ".")
+        await message.answer(i18n.get("errors.not_configured"))
         return
 
     await check_session_timeout(db_path, message.from_user.id)
@@ -53,7 +53,7 @@ async def cmd_daily(message: Message, state: FSMContext, i18n: I18n, db_path: st
 async def cmd_random(message: Message, state: FSMContext, i18n: I18n, db_path: str, services: dict):
     user = await get_user(db_path, message.from_user.id)
     if not user or not user.get("lc_session"):
-        await message.answer(i18n.get("errors.no_active_session"))
+        await message.answer(i18n.get("errors.not_configured"))
         return
 
     await check_session_timeout(db_path, message.from_user.id)
@@ -98,7 +98,7 @@ async def cmd_random(message: Message, state: FSMContext, i18n: I18n, db_path: s
 async def cmd_problem(message: Message, state: FSMContext, command: CommandObject, i18n: I18n, db_path: str, services: dict):
     user = await get_user(db_path, message.from_user.id)
     if not user or not user.get("lc_session"):
-        await message.answer(i18n.get("errors.no_active_session"))
+        await message.answer(i18n.get("errors.not_configured"))
         return
 
     slug = command.args
