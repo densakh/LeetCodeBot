@@ -15,6 +15,7 @@ from bot.keyboards import (
     SolveActionCallback,
     ResultActionCallback,
     CheckAgainCallback,
+    TheoryCallback,
     LocaleCallback,
     language_keyboard,
     locale_keyboard,
@@ -23,6 +24,7 @@ from bot.keyboards import (
     result_wrong_keyboard,
     result_tle_keyboard,
     check_again_keyboard,
+    theory_keyboard,
 )
 from bot.messages import (
     fmt_problem,
@@ -102,6 +104,7 @@ async def start_solving(message: Message, state: FSMContext, problem: Problem, i
         problem_snippets=json.dumps(
             [{"lang": s.lang, "lang_slug": s.lang_slug, "code": s.code} for s in problem.code_snippets]
         ),
+        problem_tags=json.dumps(problem.topic_tags),
         language=lang,
     )
 
@@ -109,7 +112,10 @@ async def start_solving(message: Message, state: FSMContext, problem: Problem, i
     if session:
         await update_session(db_path, session["id"], language=lang)
 
-    await message.answer(i18n.get("solve.describe_approach"))
+    await message.answer(
+        i18n.get("solve.describe_approach"),
+        reply_markup=theory_keyboard(i18n),
+    )
     await state.set_state(SolvingStates.APPROACH)
 
 
@@ -122,8 +128,44 @@ async def on_solve_lang(callback: CallbackQuery, callback_data: LangCallback, st
     if session:
         await update_session(db_path, session["id"], language=lang)
 
-    await callback.message.edit_text(i18n.get("solve.describe_approach"))
+    await callback.message.edit_text(
+        i18n.get("solve.describe_approach"),
+        reply_markup=theory_keyboard(i18n),
+    )
     await state.set_state(SolvingStates.APPROACH)
+    await callback.answer()
+
+
+@router.callback_query(SolvingStates.APPROACH, TheoryCallback.filter())
+async def on_theory(callback: CallbackQuery, state: FSMContext, i18n: I18n, services: dict):
+    data = await state.get_data()
+    ai_client: ClaudeClient = services["ai_client"]
+
+    await callback.message.edit_text(i18n.get("solve.generating_theory"))
+
+    try:
+        locale = data.get("locale", i18n.locale)
+        problem = data["problem_content"]
+        topic_tags = json.loads(data.get("problem_tags", "[]"))
+
+        theory = await ai_client.get_theory(problem, topic_tags, locale)
+
+        theory_html = md_code_to_html(theory)
+        for part in split_message(theory_html):
+            await callback.message.answer(part, parse_mode="HTML")
+
+        await callback.message.answer(
+            i18n.get("solve.describe_approach"),
+            reply_markup=theory_keyboard(i18n),
+        )
+    except AIError as e:
+        key = "errors.ai_overloaded" if "overloaded" in str(e) else "errors.ai_unavailable"
+        await callback.message.answer(i18n.get(key))
+        await callback.message.answer(
+            i18n.get("solve.describe_approach"),
+            reply_markup=theory_keyboard(i18n),
+        )
+
     await callback.answer()
 
 
@@ -536,7 +578,10 @@ async def on_result_action(callback: CallbackQuery, callback_data: ResultActionC
             await callback.message.answer(i18n.get(key))
 
     elif action == "revise":
-        await callback.message.answer(i18n.get("solve.describe_approach"))
+        await callback.message.answer(
+            i18n.get("solve.describe_approach"),
+            reply_markup=theory_keyboard(i18n),
+        )
         await state.set_state(SolvingStates.APPROACH)
 
     await callback.answer()

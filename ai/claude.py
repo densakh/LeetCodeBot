@@ -12,6 +12,7 @@ from ai.prompts import (
     HINT_WITH_CODE_PROMPT,
     IMPROVE_PROMPT,
     SYSTEM_PROMPT,
+    THEORY_PROMPT,
 )
 
 logger = logging.getLogger(__name__)
@@ -125,6 +126,19 @@ class ClaudeClient(BaseAIClient):
             locale_instruction=self._locale_instruction(locale),
         )
         return await self._ask(prompt, max_tokens=2048)
+
+    async def get_theory(
+        self,
+        problem: str,
+        topic_tags: list[str],
+        locale: str = "ru",
+    ) -> str:
+        prompt = THEORY_PROMPT.format(
+            problem=problem,
+            topic_tags=", ".join(topic_tags),
+            locale_instruction=self._locale_instruction(locale),
+        )
+        return await self._ask(prompt, max_tokens=4096)
 
     async def explain_code(
         self,

@@ -37,6 +37,10 @@ class CheckAgainCallback(CallbackData, prefix="check"):
     pass
 
 
+class TheoryCallback(CallbackData, prefix="theory"):
+    pass
+
+
 TOPICS_LIST = [
     "Arrays", "Strings", "Linked List", "Trees", "Graphs", "DP",
     "Backtracking", "Binary Search", "Greedy", "Hash Table", "Stack/Queue", "Math",
@@ -206,6 +210,17 @@ def check_again_keyboard(i18n: I18n) -> InlineKeyboardMarkup:
             InlineKeyboardButton(
                 text=i18n.get("buttons.check_again"),
                 callback_data=CheckAgainCallback().pack(),
+            ),
+        ]
+    ])
+
+
+def theory_keyboard(i18n: I18n) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text=i18n.get("buttons.theory"),
+                callback_data=TheoryCallback().pack(),
             ),
         ]
     ])

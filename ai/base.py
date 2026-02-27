@@ -29,6 +29,16 @@ class BaseAIClient(ABC):
         ...
 
     @abstractmethod
+    async def get_theory(
+        self,
+        problem: str,
+        topic_tags: list[str],
+        locale: str = "ru",
+    ) -> str:
+        """Return a theory reference based on problem and its topic tags."""
+        ...
+
+    @abstractmethod
     async def explain_code(
         self,
         code: str,

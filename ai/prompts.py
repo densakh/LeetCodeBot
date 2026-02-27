@@ -79,6 +79,24 @@ EXPLAIN_CODE_PROMPT = (
     "{locale_instruction}"
 )
 
+THEORY_PROMPT = (
+    "Problem statement:\n{problem}\n\n"
+    "Topic tags: {topic_tags}\n\n"
+    "You are a computer science tutor. Based on the problem and its topic tags, "
+    "provide a theory reference that will help the student solve this problem on their own.\n\n"
+    "Your response MUST include:\n"
+    "1. Key concepts for the relevant topics (data structures, algorithms)\n"
+    "2. Common patterns/approaches with pseudocode\n"
+    "3. Time/space complexity for each approach\n"
+    "4. A hint pointing toward the relevant pattern for THIS problem (without solving it)\n\n"
+    "STRICT RULES:\n"
+    "- Do NOT provide a ready-made solution or code for this specific problem\n"
+    "- Do NOT solve the problem step by step\n"
+    "- Focus on general theory and patterns that apply to the topic tags\n"
+    "- Pseudocode examples should be generic, not tailored to this problem\n\n"
+    "{locale_instruction}"
+)
+
 EXPLAIN_SOLUTION_PROMPT = (
     "Problem statement:\n{problem}\n\n"
     "Accepted solution:\n```{language}\n{code}\n```\n\n"

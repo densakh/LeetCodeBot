@@ -28,7 +28,8 @@
     "explain_solution_btn": "📖 Review",
     "hint_btn": "💡 Hint",
     "revision": "Describe what to change:",
-    "check_again": "🔄 Check again"
+    "check_again": "🔄 Check again",
+    "generating_theory": "⏳ Preparing theory..."
   },
   "commands": {
     "skip": "⏭ Problem skipped. Loading next...",
@@ -67,6 +68,7 @@
     "done": "✅ Done",
     "back": "◀️ Back",
     "check_again": "🔄 Check again",
+    "theory": "📚 Theory",
     "skip": "⏭ Skip",
     "cancel": "❌ Cancel"
   },
