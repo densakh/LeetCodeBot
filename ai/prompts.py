@@ -94,6 +94,14 @@ THEORY_PROMPT = (
     "- Do NOT solve the problem step by step\n"
     "- Focus on general theory and patterns that apply to the topic tags\n"
     "- Pseudocode examples should be generic, not tailored to this problem\n\n"
+    "FORMATTING RULES (Telegram-compatible markdown only):\n"
+    "- Use **bold** and *italic* for emphasis\n"
+    "- Use `inline code` and ```fenced code blocks``` for pseudocode\n"
+    "- Use plain text lists with - or numbered 1. 2. 3.\n"
+    "- Do NOT use markdown tables (| ... | ... |) — they are not supported\n"
+    "- Do NOT use horizontal rules (---)\n"
+    "- Do NOT use > blockquotes\n"
+    "- For comparisons, use plain text lists instead of tables\n\n"
     "{locale_instruction}"
 )
 
