@@ -149,8 +149,7 @@ leetcode-bot/
 │   ├── keyboards.py         # inline keyboards
 │   ├── messages.py          # message formatters
 │   ├── middlewares.py       # access control
-│   ├── i18n.py              # localization
-│   └── scheduler.py         # cookie reminders
+│   └── i18n.py              # localization
 ├── locales/
 │   ├── ru.json
 │   └── en.json

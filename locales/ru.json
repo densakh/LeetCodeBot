@@ -81,8 +81,7 @@
   },
   "cookie": {
     "expired": "⚠️ Куки истекли! Нужно обновить.",
-    "instruction": "Как получить куки:\n1. Открой leetcode.com → войди в аккаунт\n2. DevTools (F12) → Application → Cookies\n3. Скопируй <code>LEETCODE_SESSION</code> и <code>csrftoken</code>",
-    "reminder": "🔔 Куки не обновлялись больше 5 дней. Рекомендуем обновить в /settings → Куки."
+    "instruction": "Как получить куки:\n1. Открой leetcode.com → войди в аккаунт\n2. DevTools (F12) → Application → Cookies\n3. Скопируй <code>LEETCODE_SESSION</code> и <code>csrftoken</code>"
   },
   "image_placeholder": "[📎 изображение]"
 }

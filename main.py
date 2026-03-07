@@ -9,7 +9,6 @@ from aiogram.types import BotCommand
 from ai.claude import ClaudeClient
 from bot.handlers import start, solve, daily, stats, settings
 from bot.middlewares import AllowedUserMiddleware, ServiceMiddleware
-from bot.scheduler import setup_scheduler
 from config import load_config, setup_logging
 from db.database import init_db
 from db.users import get_user
@@ -72,15 +71,11 @@ async def main():
         BotCommand(command="cancel", description="Cancel session"),
     ])
 
-    # Setup scheduler
-    scheduler = setup_scheduler(bot, config.allowed_telegram_id, config.db_path)
-
     logger.info("Bot started successfully")
 
     try:
         await dp.start_polling(bot)
     finally:
-        scheduler.shutdown()
         lc = services.get("lc_client")
         if lc:
             await lc.close()

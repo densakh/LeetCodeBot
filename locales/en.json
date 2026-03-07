@@ -81,8 +81,7 @@
   },
   "cookie": {
     "expired": "⚠️ Cookies have expired! You need to update them.",
-    "instruction": "How to get cookies:\n1. Open leetcode.com → log in\n2. DevTools (F12) → Application → Cookies\n3. Copy <code>LEETCODE_SESSION</code> and <code>csrftoken</code>",
-    "reminder": "🔔 Cookies haven't been updated for over 5 days. We recommend updating in /settings → Cookies."
+    "instruction": "How to get cookies:\n1. Open leetcode.com → log in\n2. DevTools (F12) → Application → Cookies\n3. Copy <code>LEETCODE_SESSION</code> and <code>csrftoken</code>"
   },
   "image_placeholder": "[📎 image]"
 }
