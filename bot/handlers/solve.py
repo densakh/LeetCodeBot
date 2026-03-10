@@ -687,10 +687,16 @@ async def on_cookie_csrf(message: Message, state: FSMContext, i18n: I18n, db_pat
             i18n.get("onboarding.cookies_valid", username=username)
         )
 
-        # Restore suspended state
-        suspended_state = data.get("suspended_state")
-        if suspended_state:
-            await state.set_state(suspended_state)
+        # Restore to a usable state after cookie refresh
+        if data.get("current_code"):
+            await state.set_state(SolvingStates.REVIEW)
+            review_label = "Что делаем?" if i18n.locale == "ru" else "What next?"
+            await message.answer(
+                review_label,
+                reply_markup=solve_review_keyboard(i18n),
+            )
+        elif data.get("problem_content"):
+            await state.set_state(SolvingStates.APPROACH)
             await message.answer(i18n.get("solve.describe_approach"))
         else:
             await state.clear()
