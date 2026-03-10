@@ -235,6 +235,9 @@ async def on_approach(message: Message, state: FSMContext, i18n: I18n, db_path: 
     except AIError as e:
         key = "errors.ai_overloaded" if "overloaded" in str(e) else "errors.ai_unavailable"
         await message.answer(i18n.get(key))
+    except Exception as e:
+        logger.error("on_approach error: %s", e, exc_info=True)
+        await message.answer(i18n.get("errors.unknown"))
 
 
 @router.callback_query(SolvingStates.REVIEW, SolveActionCallback.filter())
