@@ -1,6 +1,49 @@
 # LeetCode Telegram Bot
 
-Personal Telegram bot for solving LeetCode problems without writing code manually. Describe your algorithm in natural language, AI generates the implementation, and the bot submits it for verification.
+Telegram-bot that helps you practice algorithmic thinking on LeetCode problems — without writing code by hand.
+
+You get a problem, describe your approach in plain text, and the bot generates code from your description, submits it to LeetCode, and shows the result. If something is wrong — ask for a hint, revise your approach, and try again.
+
+The idea: focus on understanding algorithms and data structures, not on syntax and typos.
+
+## Features
+
+- **Problem selection** — daily challenge, random by filters, or specific problem by slug
+- **Natural language solving** — describe your algorithm in words, AI turns it into code
+- **Iterative workflow** — edit, explain, submit, get hints, revise, repeat
+- **Hints on wrong answers** — AI analyzes the failing test case and gives a targeted hint
+- **Solution review** — after acceptance, get complexity analysis and optimization suggestions
+- **Theory reference** — request educational material on relevant data structures and algorithms
+- **Adaptive difficulty** — automatically adjusts difficulty based on your results
+- **Statistics** — track solved problems, streaks, and top topics
+- **Bilingual** — full Russian and English support
+- **Languages** — Python, Java, Kotlin, C++
+
+## How It Works
+
+1. **Setup** — choose interface language, enter LeetCode cookies, pick solution language, difficulty, and topics of interest
+2. **Get a problem** — use `/daily`, `/random`, or `/problem <slug>`
+3. **Read and think** — the bot shows the problem statement, examples, and starter code
+4. **Describe your approach** — explain your algorithm in plain text (or ask for theory first)
+5. **Review generated code** — the bot shows the code; you can edit it, ask for an explanation, or submit
+6. **Submit and iterate** — the bot submits to LeetCode and shows the verdict:
+   - **Accepted** — see runtime/memory stats, request a review or optimization suggestions, then move to the next problem
+   - **Wrong answer** — see expected vs actual output, ask for a hint, revise your approach
+   - **TLE / Error** — revise and try a different approach
+7. **Track progress** — `/stats` shows your solve count, difficulty breakdown, streak, and top topics
+
+## Bot Commands
+
+| Command | Description |
+|---------|-------------|
+| `/start` | Initial setup |
+| `/daily` | Daily challenge |
+| `/random` | Random problem matching your filters |
+| `/problem <slug>` | Specific problem (e.g. `/problem two-sum`) |
+| `/stats` | Solving statistics |
+| `/settings` | Change language, difficulty, topics, or cookies |
+| `/skip` | Skip current problem |
+| `/cancel` | Cancel current session |
 
 ## Requirements
 
@@ -9,49 +52,28 @@ Personal Telegram bot for solving LeetCode problems without writing code manuall
 - Anthropic API Key
 - LeetCode account
 
-## Getting LeetCode Cookies
-
-The bot needs your LeetCode session cookies to interact with the platform.
-
-### Step-by-step:
-
-1. Open [leetcode.com](https://leetcode.com) in your browser and log in
-2. Open Developer Tools (press `F12` or `Cmd+Option+I` on Mac)
-3. Go to the **Application** tab (Chrome) or **Storage** tab (Firefox)
-4. In the left sidebar, expand **Cookies** and click on `https://leetcode.com`
-5. Find and copy the value of `LEETCODE_SESSION`
-6. Find and copy the value of `csrftoken`
-
-> Cookies are valid for approximately 2 weeks. The bot will remind you when they need updating.
-
 ## Setup
 
-### 1. Clone the repository
+### 1. Clone and configure
 
 ```bash
 git clone <repo-url>
 cd leetcode-bot
-```
-
-### 2. Fill in environment variables
-
-```bash
 cp .env.example .env
 chmod 600 .env
 ```
 
-Edit `.env` and fill in:
+Edit `.env`:
 
 ```
 BOT_TOKEN=your_telegram_bot_token
 ANTHROPIC_API_KEY=your_anthropic_api_key
 ALLOWED_TELEGRAM_ID=your_telegram_user_id
-LOG_LEVEL=INFO
 ```
 
 To find your Telegram ID, message [@userinfobot](https://t.me/userinfobot).
 
-### 3. Quick Start (local)
+### 2. Run locally
 
 ```bash
 python3 -m venv .venv
@@ -60,79 +82,31 @@ pip install -r requirements.txt
 python main.py
 ```
 
-The bot will initialize the database automatically and start polling.
-
-### 4. Deploy (systemd)
-
-For a permanent setup on a server (e.g. Orange Pi):
+### 3. Deploy (systemd)
 
 ```bash
 chmod +x deploy.sh
 ./deploy.sh
 ```
 
-The deploy script will:
-- Check Python version
-- Create a virtual environment
-- Install dependencies
-- Initialize the database
-- Create and start a systemd service
+The script creates a virtual environment, installs dependencies, and sets up a systemd service.
 
-### 5. Transfer to another machine (without git)
+## Getting LeetCode Cookies
 
-```bash
-rsync -av --exclude={'.venv','data','logs','__pycache__','*.pyc','.env','.idea','.git'} ./ user@target:/path/to/leetcode-bot/
-```
+The bot needs your LeetCode session cookies to fetch problems and submit solutions.
 
-On the target machine:
+1. Open [leetcode.com](https://leetcode.com) and log in
+2. Open DevTools (`F12`) → **Application** → **Cookies** → `https://leetcode.com`
+3. Copy `LEETCODE_SESSION` and `csrftoken` values
 
-```bash
-cd /path/to/leetcode-bot
-cp .env.example .env && chmod 600 .env
-# fill in .env
-./deploy.sh
-```
-
-> `data/` is excluded — it will be recreated on first launch. Copy it separately to keep history.
-
-## Bot Commands
-
-| Command | Description |
-|---------|-------------|
-| `/start` | Initial setup (language, cookies, preferences) |
-| `/daily` | Get the LeetCode daily challenge |
-| `/random` | Get a random problem matching your filters |
-| `/stats` | View your solving statistics |
-| `/settings` | Change language, difficulty, topics, or cookies |
-| `/skip` | Skip current problem and load a new one |
-| `/cancel` | Cancel current solving session |
-
-## How It Works
-
-1. Start the bot with `/start` and complete the setup
-2. Use `/daily` or `/random` to get a problem
-3. Describe your approach in natural language
-4. Review the AI-generated code
-5. Submit to LeetCode and see the results
-6. Get hints or revise your approach if needed
+The bot will ask for these during setup. Cookies expire roughly every 2 weeks — the bot will ask you to refresh them when needed.
 
 ## Service Management
 
 ```bash
-# Check status
 sudo systemctl status leetcode-bot
-
-# Restart
 sudo systemctl restart leetcode-bot
-
-# Stop
-sudo systemctl stop leetcode-bot
-
-# View logs
 journalctl -u leetcode-bot -f
-
-# Application logs
-tail -f logs/bot.log
 ```
 
 ## Project Structure
@@ -141,31 +115,31 @@ tail -f logs/bot.log
 leetcode-bot/
 ├── bot/
 │   ├── handlers/
-│   │   ├── start.py        # onboarding
-│   │   ├── solve.py         # main solving flow
-│   │   ├── daily.py         # /daily and /random
-│   │   ├── stats.py         # /stats
-│   │   └── settings.py      # /settings
-│   ├── keyboards.py         # inline keyboards
-│   ├── messages.py          # message formatters
-│   ├── middlewares.py       # access control
-│   └── i18n.py              # localization
+│   │   ├── start.py          # onboarding
+│   │   ├── solve.py          # main solving flow
+│   │   ├── daily.py          # /daily, /random, /problem
+│   │   ├── stats.py          # /stats
+│   │   └── settings.py       # /settings
+│   ├── keyboards.py          # inline keyboards
+│   ├── messages.py           # message formatters
+│   ├── middlewares.py        # access control
+│   └── i18n.py               # localization
 ├── locales/
 │   ├── ru.json
 │   └── en.json
 ├── leetcode/
-│   ├── client.py            # LeetCode API client
-│   ├── queries.py           # GraphQL queries
-│   ├── models.py            # data models
-│   └── html_converter.py    # HTML to Telegram format
+│   ├── client.py             # LeetCode API client
+│   ├── queries.py            # GraphQL queries
+│   ├── models.py             # data models
+│   └── html_converter.py     # HTML → Telegram format
 ├── ai/
-│   ├── base.py              # abstract AI client
-│   ├── claude.py            # Claude implementation
-│   └── prompts.py           # system prompts
+│   ├── base.py               # abstract AI client
+│   ├── claude.py             # Claude implementation
+│   └── prompts.py            # system prompts
 ├── db/
-│   ├── database.py          # DB initialization
-│   ├── users.py             # user CRUD
-│   └── sessions.py          # session CRUD
+│   ├── database.py           # DB init
+│   ├── users.py              # user CRUD
+│   └── sessions.py           # session CRUD
 ├── config.py
 ├── main.py
 ├── requirements.txt
